@@ -1,5 +1,6 @@
 # FADO
 Framework for Aerostructural Design Optimization
+This is a fork for the original FADO repository and is being developed to interface with pyOptSparse and in-house large-scale aeroelastic topology optimization framework.
 
 ## Motivation
 Q: "What is my purpose?"
