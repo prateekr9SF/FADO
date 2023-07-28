@@ -74,6 +74,10 @@ class DriverBase:
         self._gtval = None
         self._monval = None
 
+        # Boolean for hot restart
+        self._restart = None
+        self._restartPoint = None
+
         # map the start index of each variable in the design vector
         self._variableStartMask = None
 
@@ -92,6 +96,11 @@ class DriverBase:
         self._userPostProcessFun = None
         self._userPostProcessGrad = None
     #end
+
+    def hotRestart(self, restart = False, restartPoint = 0):
+        self._restart = restart
+        if self._restart:
+            self._restartPoint = restartPoint
 
     def addObjective(self,type,function,scale=1.0,weight=1.0):
         """
@@ -326,19 +335,16 @@ class DriverBase:
         self._resetAllGradientEvaluations()
 
         # manage working directories
-        print("Managing directories...")
-        print("Changing to :", self._userDir)
         os.chdir(self._userDir)
-        print("The work dir is :", self._workDir)
         if os.path.isdir(self._workDir):
             if self._keepDesigns:
-                print("Keeping all old designs")
-                dirName = self._dirPrefix+str(self._funEval).rjust(3,"0")
-                print("dirName:", dirName)
+                if self._restart:
+                    dirName = self._dirPrefix+str(self._funEval+ self._restartPoint).rjust(3,"0")
+                else:
+                    dirName = self._dirPrefix+str(self._funEval).rjust(3,"0")
+
                 if os.path.isdir(dirName):
-                    print("Removing ", dirName)
-                    shutil.rmtree(dirName)
-                print(f"Renaming {self._workDir} to ", dirName)    
+                    shutil.rmtree(dirName)  
                 os.rename(self._workDir,dirName)
             else:
                 shutil.rmtree(self._workDir)
