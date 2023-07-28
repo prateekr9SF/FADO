@@ -326,11 +326,19 @@ class DriverBase:
         self._resetAllGradientEvaluations()
 
         # manage working directories
+        print("Managing directories...")
+        print("Changing to :", self._userDir)
         os.chdir(self._userDir)
+        print("The work dir is :", self._workDir)
         if os.path.isdir(self._workDir):
             if self._keepDesigns:
+                print("Keeping all old designs")
                 dirName = self._dirPrefix+str(self._funEval).rjust(3,"0")
-                if os.path.isdir(dirName): shutil.rmtree(dirName)
+                print("dirName:", dirName)
+                if os.path.isdir(dirName):
+                    print("Removing ", dirName)
+                    shutil.rmtree(dirName)
+                print(f"Renaming {self._workDir} to ", dirName)    
                 os.rename(self._workDir,dirName)
             else:
                 shutil.rmtree(self._workDir)

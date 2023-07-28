@@ -45,6 +45,11 @@ class ScipyDriver(ConstrainedOptimizationDriver):
                 return self._f(x,self._i)
         #end
 
+       #class _counter:
+       #     def __init__(self, counter):
+       #         self.counter = counter
+       #         print(f"Function eval counter")
+
         # setup the constraint list, the callbacks are the same for all
         # constraints, an index argument (i) is used to distinguish them.
         self._constraints = []
@@ -62,6 +67,7 @@ class ScipyDriver(ConstrainedOptimizationDriver):
         self._old_grad_f = np.zeros((self._nVar,))
         self._jac_g = np.zeros((self._nVar,self._nCon))
         self._old_jac_g = np.zeros((self._nVar,self._nCon))
+
     #end
 
     def getConstraints(self):
@@ -74,6 +80,18 @@ class ScipyDriver(ConstrainedOptimizationDriver):
 
     def fun(self, x):
         """Method passed to SciPy to get the objective function value."""
+        # Evaluates all functions if necessary.
+        self._evaluateFunctions(x)
+        self._counter +=1
+        return self._ofval.sum()
+    #end
+
+    def fEvalCtr(self):
+        """Method used by callback function to update feval counter."""
+        return self._counter
+
+    def funRec(self, x):
+        """Method used by callback function to record objective function value."""
         # Evaluates all functions if necessary.
         self._evaluateFunctions(x)
         return self._ofval.sum()

@@ -31,6 +31,9 @@ class ConstrainedOptimizationDriver(ParallelEvalDriver):
         # counters, flags, sizes...
         self._nCon = 0
 
+        # counter for function evaluetion
+        self._counter = 0
+
         # list of constraints and variable bounds
         self._constraints = []
         self._bounds = []

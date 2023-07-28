@@ -18,3 +18,4 @@ except: pass
 from optimizers import goldenSection
 from optimizers import quadraticInterp
 from optimizers import fletcherReeves
+from monitor import *
