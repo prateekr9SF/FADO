@@ -136,9 +136,21 @@ class ScipyDriver(ConstrainedOptimizationDriver):
             out = self._eqval[idx]
         else:
             out = self._gtval[idx-len(self._constraintsEQ)]
-        #end
 
-        return out
+        # Scale the out with local scaling (local to each constraint)
+        # Incase of equality constraint:
+        if idx < len(self._constraintsEQ):
+            con = self._constraintsEQ[idx]
+            f = -1.0 
+            out = out * con.localscale
+
+        # Incase of inequality constraint 
+        else:   
+            con = self._constraintsGT[idx-len(self._constraintsEQ)]
+            f = self._gtval[idx-len(self._constraintsEQ)]
+            out = out * con.localscale
+        #end
+        return out 
     #end
 
     # Method passed to SciPy to expose the constraint Jacobian.
@@ -160,7 +172,7 @@ class ScipyDriver(ConstrainedOptimizationDriver):
             #end
 
             if f < 0.0 or not self._asNeeded:
-                self._jac_g[:,idx] = con.function.getGradient(mask) * con.scale / self._varScales
+                self._jac_g[:,idx] = con.function.getGradient(mask) * (con.scale) / self._varScales
             else:
                 self._jac_g[:,idx] = 0.0
             #end

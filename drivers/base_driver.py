@@ -40,10 +40,11 @@ class DriverBase:
     #end
 
     class _Constraint:
-        def __init__(self,function,scale,bound=-1E20):
+        def __init__(self,function,scale,localscale,bound=-1E20):
             self.scale = scale
             self.bound = bound
             self.function = function
+            self.localscale = localscale
     #end
 
     class _Monitor:
@@ -122,15 +123,15 @@ class DriverBase:
         if scale <= 0.0: raise ValueError("Scale must be positive.")
         self._constraintsEQ.append(self._Constraint(function,scale,target))
 
-    def addLowerBound(self,function,bound=0.0,scale=1.0):
+    def addLowerBound(self,function,bound=0.0,scale=1.0, localscale = 1.0):
         """Add a lower bound inequality constraint."""
         if scale <= 0.0: raise ValueError("Scale must be positive.")
-        self._constraintsGT.append(self._Constraint(function,scale,bound))
+        self._constraintsGT.append(self._Constraint(function,scale,localscale,bound))
 
-    def addUpperBound(self,function,bound=0.0,scale=1.0):
+    def addUpperBound(self,function,bound=0.0,scale=1.0, localscale = 1.0):
         """Add an upper bound inequality constraint."""
         if scale <= 0.0: raise ValueError("Scale must be positive.")
-        self._constraintsGT.append(self._Constraint(function,-1*scale,bound))
+        self._constraintsGT.append(self._Constraint(function,-1*scale,localscale,bound))
 
     def addUpLowBound(self,function,lower=-1.0,upper=1.0):
         """Add a range constraint, this is converted into lower/upper bounds."""
