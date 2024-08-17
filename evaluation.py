@@ -95,9 +95,42 @@ class ExternalRun:
         files before variables."""
         self._parameters.append(param)
 
-    def addExpected(self,file):
+    def parseAndModifyExpected(self, file):
+        """
+        Parses the input file and sets all floats to zero except the last value.
+
+        Parameters
+        ----------
+        file : Path to the file.
+        """
+        with open(file, 'r') as f:
+            lines = f.readlines()
+
+        # Modify the lines as required
+        for i in range(len(lines) - 1):
+            try:
+                float(lines[i].strip())
+                lines[i] = '0.0\n'
+            except ValueError:
+                pass
+
+        # Ensure the last line's value remains unchanged if it is a float
+        try:
+            float(lines[-1].strip())
+        except ValueError:
+            pass
+
+        with open(file, 'w') as f:
+            f.writelines(lines)
+
+    def addExpected(self,file, parse_and_modify=False):
         """Add an expected (output) file of the run, the presence of all expected
         files in the working subdirectory indicates that the run succeeded."""
+
+        # Parse and modify gradient file  (set all grad values except for the tail to zero) 
+        if parse_and_modify:
+            self.parseAndModifyExpected(file)
+       
         self._expectedFiles.append(os.path.join(self._workDir,file))
 
     def setMaxTries(self,num):

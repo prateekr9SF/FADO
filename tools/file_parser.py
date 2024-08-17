@@ -166,12 +166,14 @@ class TableReader:
     >>> TableReader(1,1,(1,1),(None,None)) -> 5
     >>> TableReader(0,None,(1,0),(2,None)) -> [0, 1, 2]
     """
-    def __init__(self,row=0,col=0,start=(0,0),end=(None,None),delim=""):
+    def __init__(self,row=0,col=0,start=(0,0),end=(None,None),delim="", zero_except_last=False, zero_last=False):
         self._row = row
         self._col = col
         self._end = end
         self._start = start
         self._delim = delim
+        self._zero_except_last = zero_except_last
+        self._zero_last = zero_last
 
     def read(self,file):
         with open(file) as f:
@@ -199,6 +201,15 @@ class TableReader:
 
             for col in range(numCol):
                 data[row,col] = float(tmp[col])
+
+        # IF tail rotation is present to enforce CMy = 0,set all CMy sens to zero
+        # WARNING: FFD_ROTATION MUST BE LAST IN DV_PARMS        
+        if self._zero_except_last:
+            data[:-1, :] = 0.0
+            #print(" Tail moment passed to the optimizer ", data)
+        if self._zero_last:
+            data[-1, :] = 0.0
+            #print(" Gradient passed to the optimizer: ", data)
         #end
 
         if self._row is None:
@@ -228,14 +239,16 @@ class LabeledTableReader(TableReader):
     label : Title of the column (usually a string).
     delim : Delimiter character separating the columns.
     rang  : Row range, by default return the last value in the column.
+    zero_last: Set last value (for tail rotation) to zero
 
     See also
     --------
     TableReader, PreStringHandler
     """
-    def __init__(self,label,delim=",",rang=(-1,None)):
+    def __init__(self,label,delim=",",rang=(-1,None), set_theta_zero=False):
         self._label = label
         self._range = rang
+        self._set_theta_zero = set_theta_zero
         TableReader.__init__(self,None,None,(1,0),(None,None),delim)
     #end
 
@@ -245,6 +258,23 @@ class LabeledTableReader(TableReader):
         header = [x.strip() for x in header]
         self._col = header.index(self._label)
         data = TableReader.read(self,file)[self._range[0]:self._range[1]]
+
+        # IF tail rotation is present to enforce CMy = 0,set thicknes ssens to zero
+        # WARNING: FFD_ROTATION MUST BE LAST IN DV_PARMS
+
+        # Check if data is an array (of gradients)
+        if self._set_theta_zero:
+            if data.size > 1:
+                # Set tail rotation gradient zero
+                data[-1] = 0.0
+                #print("Removed last entry for tail rotation")
+                #print("\n")
+            
+        #if self._zero_last:
+        #    print("Removing data from last point...")
+        #    data[-1] = 0.0
+        #    print("Geo grads passed:", data)
+
         if data.size == 1: data = data[0]
         return data
     #end

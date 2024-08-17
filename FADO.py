@@ -12,6 +12,9 @@ from tools import BoundConstraints
 from tools import GradientScale
 from drivers import ExteriorPenaltyDriver
 from drivers import ScipyDriver
+# Import CyIpOpt driver if possible.
+try: from drivers import CyipoptDriver
+except: pass
 # Import IpOpt driver if possible.
 try: from drivers import IpoptDriver
 except: pass
@@ -19,3 +22,5 @@ from optimizers import goldenSection
 from optimizers import quadraticInterp
 from optimizers import fletcherReeves
 from monitor import *
+
+
